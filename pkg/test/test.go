@@ -5,12 +5,13 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
 	"github.com/johnfercher/go-tree/node"
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/yaml.v3"
 
 	"github.com/johnfercher/maroto/v2/pkg/core"
 )
@@ -37,17 +38,11 @@ type MarotoTest struct {
 // New creates the MarotoTest instance to unit tests.
 func New(t *testing.T) *MarotoTest {
 	if configSingleton == nil {
-		path, err := getMarotoConfigFilePath()
+		cfg, err := loadMarotoConfig()
 		if err != nil {
-			assert.Fail(t, fmt.Sprintf("could not find .maroto.yml file. %s", err.Error()))
+			assert.Fail(t, fmt.Sprintf("could not load maroto config: %s", err.Error()))
 		}
 
-		cfg, err := loadMarotoConfigFile(path)
-		if err != nil {
-			assert.Fail(t, fmt.Sprintf("could not parse .maroto.yml. %s", err.Error()))
-		}
-
-		cfg.AbsolutePath = path
 		configSingleton = cfg
 	}
 
@@ -77,7 +72,7 @@ func (m *MarotoTest) Equals(file string) *MarotoTest {
 	_ = json.Unmarshal(indentedExpectBytes, savedNode)
 	expectedBytes, _ := json.Marshal(savedNode)
 
-	assert.Equal(m.t, string(expectedBytes), actualString)
+	assert.Equal(m.t, string(expectedBytes), actualString, fmt.Sprintf("json: %s", configSingleton.getAbsoluteFilePath(file)))
 	return m
 }
 
@@ -110,49 +105,16 @@ func (m *MarotoTest) buildNode(node *node.Node[core.Structure]) *Node {
 	return actual
 }
 
-func getMarotoConfigFilePath() (string, error) {
-	path, _ := os.Getwd()
-	path += "/"
-
-	return getMarotoConfigFilePathRecursive(path)
-}
-
-func loadMarotoConfigFile(path string) (*Config, error) {
-	bytes, err := os.ReadFile(path + "/" + marotoFile)
-	if err != nil {
-		return nil, err
+func loadMarotoConfig() (*Config, error) {
+	_, filename, _, ok := runtime.Caller(0)
+	if !ok {
+		return nil, errors.New("unable to get the current filename")
 	}
 
-	cfg := &Config{}
-	err = yaml.Unmarshal(bytes, cfg)
-	if err != nil {
-		return nil, err
-	}
-
-	return cfg, nil
-}
-
-func getMarotoConfigFilePathRecursive(path string) (string, error) {
-	hasMaroto, err := hasFileInPath(marotoFile, path)
-	if err != nil {
-		return "", err
-	}
-
-	if hasMaroto {
-		return path, nil
-	}
-
-	hasGoMod, err := hasFileInPath(goModFile, path)
-	if err != nil {
-		return "", err
-	}
-
-	if hasGoMod {
-		return "", errors.New("found go.mod but not .maroto.yml")
-	}
-
-	parentPath := getParentDir(path)
-	return getMarotoConfigFilePathRecursive(parentPath)
+	return &Config{
+		AbsolutePath: filepath.Dir(filepath.Dir(filepath.Dir(filename))),
+		TestPath:     "test/maroto",
+	}, nil
 }
 
 func hasFileInPath(file string, path string) (bool, error) {

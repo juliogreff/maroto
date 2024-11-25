@@ -15,13 +15,6 @@ type Math interface {
 	Resize(inner *entity.Dimensions, outer *entity.Dimensions, percent float64, justReferenceWidth bool) *entity.Dimensions
 }
 
-// Code is the abstraction which deals of how to add QrCodes or Barcode in a PDF.
-type Code interface {
-	GenQr(code string) (*entity.Image, error)
-	GenDataMatrix(code string) (*entity.Image, error)
-	GenBar(code string, cell *entity.Cell, prop *props.Barcode) (*entity.Image, error)
-}
-
 // Image is the abstraction which deals of how to add images in a PDF.
 type Image interface {
 	Add(img *entity.Image, cell *entity.Cell, margins *entity.Margins, prop *props.Rect, extension extension.Type, flow bool) error

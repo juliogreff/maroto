@@ -1,6 +1,8 @@
 // Package test implements unit test feature.
 package test
 
+import "path"
+
 // Config is the representation of a test config.
 type Config struct {
 	AbsolutePath string
@@ -8,5 +10,5 @@ type Config struct {
 }
 
 func (c *Config) getAbsoluteFilePath(file string) string {
-	return c.AbsolutePath + c.TestPath + file
+	return path.Join(c.AbsolutePath, c.TestPath, file)
 }

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/johnfercher/maroto/v2/pkg/components/code"
 	"github.com/johnfercher/maroto/v2/pkg/components/text"
 
 	"github.com/johnfercher/maroto/v2/pkg/components/col"
@@ -459,7 +458,7 @@ func TestMaroto_RegisterHeader(t *testing.T) {
 	t.Run("when header size is correct, should not return error and apply header", func(t *testing.T) {
 		sut := maroto.New()
 
-		err := sut.RegisterHeader(code.NewBarRow(10, "header"))
+		err := sut.RegisterHeader(text.NewAutoRow("header"))
 
 		var rows []core.Row
 		for i := 0; i < 5; i++ {
@@ -503,7 +502,7 @@ func TestMaroto_RegisterFooter(t *testing.T) {
 	t.Run("when header size is correct, should not return error and apply header", func(t *testing.T) {
 		sut := maroto.New()
 
-		err := sut.RegisterFooter(code.NewBarRow(10, "footer"))
+		err := sut.RegisterFooter(text.NewAutoRow("footer"))
 
 		var rows []core.Row
 		for i := 0; i < 5; i++ {

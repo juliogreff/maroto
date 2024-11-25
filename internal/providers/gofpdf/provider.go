@@ -3,11 +3,8 @@ package gofpdf
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"path/filepath"
 	"strings"
-
-	"github.com/johnfercher/maroto/v2/pkg/consts/barcode"
 
 	"github.com/johnfercher/maroto/v2/internal/cache"
 	"github.com/johnfercher/maroto/v2/internal/merror"
@@ -23,7 +20,6 @@ type provider struct {
 	fpdf       gofpdfwrapper.Fpdf
 	font       core.Font
 	text       core.Text
-	code       core.Code
 	image      core.Image
 	line       core.Line
 	cache      cache.Cache
@@ -37,7 +33,6 @@ func New(dep *Dependencies) core.Provider {
 		fpdf:       dep.Fpdf,
 		font:       dep.Font,
 		text:       dep.Text,
-		code:       dep.Code,
 		image:      dep.Image,
 		line:       dep.Line,
 		cellWriter: dep.CellWriter,
@@ -60,52 +55,6 @@ func (g *provider) GetFontHeight(prop *props.Font) float64 {
 
 func (g *provider) AddLine(cell *entity.Cell, prop *props.Line) {
 	g.line.Add(cell, prop)
-}
-
-func (g *provider) AddMatrixCode(code string, cell *entity.Cell, prop *props.Rect) {
-	img, err := g.loadCode(code, "matrix-code-", g.code.GenDataMatrix)
-	if err != nil {
-		g.text.Add("could not generate matrixcode", cell, merror.DefaultErrorText)
-		return
-	}
-
-	err = g.image.Add(img, cell, g.cfg.Margins, prop, extension.Png, false)
-	if err != nil {
-		g.fpdf.ClearError()
-		g.text.Add("could not add matrixcode to document", cell, merror.DefaultErrorText)
-	}
-}
-
-func (g *provider) AddQrCode(code string, cell *entity.Cell, prop *props.Rect) {
-	img, err := g.loadCode(code, "qr-code-", g.code.GenQr)
-	if err != nil {
-		g.text.Add("could not generate qrcode", cell, merror.DefaultErrorText)
-		return
-	}
-
-	err = g.image.Add(img, cell, g.cfg.Margins, prop, extension.Png, false)
-	if err != nil {
-		g.fpdf.ClearError()
-		g.text.Add("could not add qrcode to document", cell, merror.DefaultErrorText)
-	}
-}
-
-func (g *provider) AddBarCode(code string, cell *entity.Cell, prop *props.Barcode) {
-	image, err := g.cache.GetImage(g.getBarcodeImageName(fmt.Sprintf("bar-code-%s", code), prop), extension.Png)
-	if err != nil {
-		image, err = g.code.GenBar(code, cell, prop)
-	}
-	if err != nil {
-		g.text.Add("could not generate barcode", cell, merror.DefaultErrorText)
-		return
-	}
-
-	g.cache.AddImage(g.getBarcodeImageName(fmt.Sprintf("bar-code-%s", code), prop), image)
-	err = g.image.Add(image, cell, g.cfg.Margins, prop.ToRectProp(), extension.Png, false)
-	if err != nil {
-		g.fpdf.ClearError()
-		g.text.Add("could not add barcode to document", cell, merror.DefaultErrorText)
-	}
 }
 
 func (g *provider) AddImageFromFile(file string, cell *entity.Cell, prop *props.Rect) {
@@ -222,37 +171,6 @@ func (g *provider) GetDimensionsByImageByte(bytes []byte, extension extension.Ty
 	return &entity.Dimensions{Width: imgInfo.Width(), Height: imgInfo.Height()}, nil
 }
 
-// GetDimensionsByMatrixCode is responsible for obtaining the dimensions of an MatrixCode
-// If the image cannot be loaded, an error is returned
-func (g *provider) GetDimensionsByMatrixCode(code string) (*entity.Dimensions, error) {
-	img, err := g.loadCode(code, "matrix-code-", g.code.GenDataMatrix)
-	if err != nil {
-		return nil, err
-	}
-
-	imgInfo, _ := g.image.GetImageInfo(img, extension.Png)
-
-	if imgInfo == nil {
-		return nil, errors.New("could not read image options, maybe path/name is wrong")
-	}
-	return &entity.Dimensions{Width: imgInfo.Width(), Height: imgInfo.Height()}, nil
-}
-
-// GetDimensionsByQrCode is responsible for obtaining the dimensions of an QrCode
-// If the image cannot be loaded, an error is returned
-func (g *provider) GetDimensionsByQrCode(code string) (*entity.Dimensions, error) {
-	img, err := g.loadCode(code, "qr-code-", g.code.GenQr)
-	if err != nil {
-		return nil, err
-	}
-
-	imgInfo, _ := g.image.GetImageInfo(img, extension.Png)
-	if imgInfo == nil {
-		return nil, errors.New("could not read image options, maybe path/name is wrong")
-	}
-	return &entity.Dimensions{Width: imgInfo.Width(), Height: imgInfo.Height()}, nil
-}
-
 func (g *provider) GenerateBytes() ([]byte, error) {
 	var buffer bytes.Buffer
 	err := g.fpdf.Output(&buffer)
@@ -266,30 +184,6 @@ func (g *provider) CreateCol(width, height float64, config *entity.Config, prop 
 
 func (g *provider) SetCompression(compression bool) {
 	g.fpdf.SetCompression(compression)
-}
-
-func (g *provider) getBarcodeImageName(code string, prop *props.Barcode) string {
-	if prop == nil {
-		return code + string(barcode.Code128)
-	}
-
-	return code + string(prop.Type)
-}
-
-// loadImage is responsible for loading an codes
-func (g *provider) loadCode(code, codeType string, generate func(code string) (*entity.Image, error)) (*entity.Image, error) {
-	image, err := g.cache.GetImage(codeType+code, extension.Png)
-	if err != nil {
-		image, err = generate(code)
-	} else {
-		return image, nil
-	}
-	if err != nil {
-		return nil, err
-	}
-	g.cache.AddImage(codeType+code, image)
-
-	return image, nil
 }
 
 // loadImage is responsible for loading an image

@@ -52,22 +52,6 @@ func FontProp() props.Font {
 	return prop
 }
 
-// BarcodeProp is responsible to give a valid props.Barcode.
-func BarcodeProp() props.Barcode {
-	prop := props.Barcode{
-		Top:     10,
-		Left:    10,
-		Percent: 98,
-		Proportion: props.Proportion{
-			Width:  16,
-			Height: 9,
-		},
-		Center: false,
-	}
-	prop.MakeValid()
-	return prop
-}
-
 // RectProp is responsible to give a valid props.Rect.
 func RectProp() props.Rect {
 	prop := props.Rect{

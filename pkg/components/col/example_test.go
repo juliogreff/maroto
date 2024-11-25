@@ -2,7 +2,6 @@ package col_test
 
 import (
 	"github.com/johnfercher/maroto/v2"
-	"github.com/johnfercher/maroto/v2/pkg/components/code"
 	"github.com/johnfercher/maroto/v2/pkg/components/col"
 	"github.com/johnfercher/maroto/v2/pkg/components/row"
 	"github.com/johnfercher/maroto/v2/pkg/components/signature"
@@ -33,10 +32,9 @@ func ExampleCol_Add() {
 	col := col.New()
 
 	text := text.New("text content")
-	qrCode := code.NewQr("qrcode")
 	signature := signature.New("signature label")
 
-	col.Add(text, qrCode, signature)
+	col.Add(text, signature)
 
 	row := row.New(10).Add(col)
 

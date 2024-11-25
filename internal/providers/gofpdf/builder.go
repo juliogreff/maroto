@@ -4,7 +4,6 @@ import (
 	"github.com/jung-kurt/gofpdf"
 
 	"github.com/johnfercher/maroto/v2/internal/cache"
-	"github.com/johnfercher/maroto/v2/internal/code"
 	"github.com/johnfercher/maroto/v2/internal/math"
 	"github.com/johnfercher/maroto/v2/internal/providers/gofpdf/cellwriter"
 	"github.com/johnfercher/maroto/v2/internal/providers/gofpdf/gofpdfwrapper"
@@ -17,7 +16,6 @@ type Dependencies struct {
 	Fpdf       gofpdfwrapper.Fpdf
 	Font       core.Font
 	Text       core.Text
-	Code       core.Code
 	Image      core.Image
 	Line       core.Line
 	Cache      cache.Cache
@@ -64,7 +62,6 @@ func (b *builder) Build(cfg *entity.Config, cache cache.Cache) *Dependencies {
 
 	font := NewFont(fpdf, cfg.DefaultFont.Size, cfg.DefaultFont.Family, cfg.DefaultFont.Style)
 	math := math.New()
-	code := code.New()
 	text := NewText(fpdf, math, font)
 	image := NewImage(fpdf, math)
 	line := NewLine(fpdf)
@@ -75,7 +72,6 @@ func (b *builder) Build(cfg *entity.Config, cache cache.Cache) *Dependencies {
 		Fpdf:       fpdf,
 		Font:       font,
 		Text:       text,
-		Code:       code,
 		Image:      image,
 		Line:       line,
 		CellWriter: cellWriter,

@@ -1,4 +1,0 @@
-generate -> avg: 10.27ms, executions: [10.27ms]
-footer -> avg: 1.09μs, executions: [1.09μs]
-add_rows -> avg: 88.82ns, executions: [257.00ns, 118.00ns, 90.00ns, 45.00ns, 101.00ns, 40.00ns, 31.00ns, 30.00ns, 167.00ns, 39.00ns, 32.00ns, 29.00ns, 31.00ns, 31.00ns, 30.00ns, 30.00ns, 554.00ns, 32.00ns, 30.00ns, 29.00ns, 215.00ns, 32.00ns, 32.00ns, 35.00ns, 607.00ns, 122.00ns, 72.00ns, 31.00ns, 70.00ns, 31.00ns, 33.00ns, 32.00ns, 82.00ns, 29.00ns, 32.00ns, 31.00ns, 30.00ns, 30.00ns, 33.00ns, 32.00ns, 104.00ns, 33.00ns, 30.00ns, 260.00ns, 46.00ns, 37.00ns, 33.00ns, 33.00ns, 443.00ns, 65.00ns]
-file_size -> 14.76Kb

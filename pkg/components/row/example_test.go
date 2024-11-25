@@ -2,7 +2,6 @@ package row_test
 
 import (
 	"github.com/johnfercher/maroto/v2"
-	"github.com/johnfercher/maroto/v2/pkg/components/code"
 	"github.com/johnfercher/maroto/v2/pkg/components/row"
 	"github.com/johnfercher/maroto/v2/pkg/components/signature"
 	"github.com/johnfercher/maroto/v2/pkg/components/text"
@@ -30,10 +29,9 @@ func ExampleNew() {
 // ExampleRow_Add demonstrates how to add cols inside a Row.
 func ExampleRow_Add() {
 	textCol := text.NewCol(12, "text content")
-	qrCodeCol := code.NewQrCol(12, "qrcode")
 	signatureCol := signature.NewCol(12, "signature label")
 
-	row := row.New(10).Add(textCol, qrCodeCol, signatureCol)
+	row := row.New(10).Add(textCol, signatureCol)
 
 	m := maroto.New()
 	m.AddRows(row)

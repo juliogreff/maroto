@@ -7,8 +7,8 @@ import (
 
 	"github.com/johnfercher/maroto/v2/internal/fixture"
 	"github.com/johnfercher/maroto/v2/mocks"
-	"github.com/johnfercher/maroto/v2/pkg/components/code"
 	"github.com/johnfercher/maroto/v2/pkg/components/col"
+	"github.com/johnfercher/maroto/v2/pkg/components/text"
 	"github.com/johnfercher/maroto/v2/pkg/core/entity"
 	"github.com/johnfercher/maroto/v2/pkg/props"
 	"github.com/johnfercher/maroto/v2/pkg/test"
@@ -31,7 +31,7 @@ func TestNew(t *testing.T) {
 	})
 	t.Run("when has component, should retrieve components", func(t *testing.T) {
 		// Act
-		c := col.New(12).Add(code.NewQr("code"))
+		c := col.New(12).Add(text.New("code"))
 
 		// Assert
 		test.New(t).Assert(c.GetStructure()).Equals("components/cols/new_with_components.json")
