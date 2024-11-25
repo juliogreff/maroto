@@ -1,7 +1,6 @@
 package entity
 
 import (
-	"github.com/johnfercher/maroto/v2/pkg/consts/generation"
 	"github.com/johnfercher/maroto/v2/pkg/consts/provider"
 	"github.com/johnfercher/maroto/v2/pkg/props"
 )
@@ -13,7 +12,6 @@ type Config struct {
 	Margins              *Margins
 	DefaultFont          *props.Font
 	CustomFonts          []*CustomFont
-	GenerationMode       generation.Mode
 	ChunkWorkers         int
 	Debug                bool
 	MaxGridSize          int
@@ -45,7 +43,6 @@ func (c *Config) ToMap() map[string]interface{} {
 		m = c.DefaultFont.AppendMap(m)
 	}
 
-	m["generation_mode"] = c.GenerationMode
 	m["chunk_workers"] = c.ChunkWorkers
 
 	if c.Debug {

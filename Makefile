@@ -31,10 +31,6 @@ mock-lint:
 install:
 	bash shell/install.sh
 
-.PHONY: godoc
-godoc:
-	godoc -http=127.0.0.1:6060
-
 
 .PHONY: mocks
 mocks:

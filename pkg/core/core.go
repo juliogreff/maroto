@@ -5,7 +5,6 @@ import (
 	"github.com/johnfercher/go-tree/node"
 
 	"github.com/johnfercher/maroto/v2/pkg/core/entity"
-	"github.com/johnfercher/maroto/v2/pkg/metrics"
 	"github.com/johnfercher/maroto/v2/pkg/props"
 )
 
@@ -28,8 +27,6 @@ type Document interface {
 	GetBytes() []byte
 	GetBase64() string
 	Save(file string) error
-	GetReport() *metrics.Report
-	Merge([]byte) error
 }
 
 // Node is the interface that wraps the basic methods of a node.

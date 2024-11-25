@@ -10,12 +10,11 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/johnfercher/maroto/v2/pkg/core"
-	"github.com/johnfercher/maroto/v2/pkg/metrics"
 )
 
 func TestNewPDF(t *testing.T) {
 	// Act
-	sut := core.NewPDF(nil, nil)
+	sut := core.NewPDF(nil)
 
 	// Assert
 	assert.NotNil(t, sut)
@@ -24,7 +23,7 @@ func TestNewPDF(t *testing.T) {
 
 func TestPdf_GetBase64(t *testing.T) {
 	// Arrange
-	sut := core.NewPDF([]byte{1, 2, 3}, nil)
+	sut := core.NewPDF([]byte{1, 2, 3})
 
 	// Act
 	b64 := sut.GetBase64()
@@ -35,7 +34,7 @@ func TestPdf_GetBase64(t *testing.T) {
 
 func TestPdf_GetBytes(t *testing.T) {
 	// Arrange
-	sut := core.NewPDF([]byte{1, 2, 3}, nil)
+	sut := core.NewPDF([]byte{1, 2, 3})
 
 	// Act
 	bytes := sut.GetBytes()
@@ -44,27 +43,10 @@ func TestPdf_GetBytes(t *testing.T) {
 	assert.Equal(t, []byte{1, 2, 3}, bytes)
 }
 
-func TestPdf_GetReport(t *testing.T) {
-	// Arrange
-	sut := core.NewPDF(nil, &metrics.Report{SizeMetric: metrics.SizeMetric{
-		Key: "key",
-		Size: metrics.Size{
-			Value: 10.0,
-			Scale: metrics.Byte,
-		},
-	}})
-
-	// Act
-	report := sut.GetReport()
-
-	// Assert
-	assert.Equal(t, "key", report.SizeMetric.Key)
-}
-
 func TestPdf_Save(t *testing.T) {
 	t.Run("when cannot save, should return error", func(t *testing.T) {
 		// Arrange
-		sut := core.NewPDF(nil, nil)
+		sut := core.NewPDF(nil)
 
 		// Act
 		err := sut.Save("")
@@ -76,7 +58,7 @@ func TestPdf_Save(t *testing.T) {
 		// Arrange
 		bytes := []byte{1, 2, 3}
 		file := buildPath("test.txt")
-		sut := core.NewPDF(bytes, nil)
+		sut := core.NewPDF(bytes)
 
 		// Act
 		err := sut.Save(file)

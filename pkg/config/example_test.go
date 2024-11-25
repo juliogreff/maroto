@@ -83,16 +83,3 @@ func ExampleCfgBuilder_WithBottomMargin() {
 
 	// generate document
 }
-
-// ExampleCfgBuilder_WithConcurrentMode demonstrates how to enable concurrent generation.
-func ExampleCfgBuilder_WithConcurrentMode() {
-	// if chunkWorkers is less than 1, then ignore customization.
-	chunkWorkers := 7
-	cfg := config.NewBuilder().
-		WithConcurrentMode(chunkWorkers).
-		Build()
-
-	_ = maroto.New(cfg)
-
-	// generate document
-}

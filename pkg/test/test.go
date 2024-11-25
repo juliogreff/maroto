@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"strings"
 	"testing"
 
 	"github.com/johnfercher/go-tree/node"
@@ -16,11 +15,7 @@ import (
 	"github.com/johnfercher/maroto/v2/pkg/core"
 )
 
-var (
-	marotoFile              = ".maroto.yml"
-	goModFile               = "go.mod"
-	configSingleton *Config = nil
-)
+var configSingleton *Config = nil
 
 type Node struct {
 	Value   interface{}            `json:"value,omitempty"`
@@ -115,31 +110,4 @@ func loadMarotoConfig() (*Config, error) {
 		AbsolutePath: filepath.Dir(filepath.Dir(filepath.Dir(filename))),
 		TestPath:     "test/maroto",
 	}, nil
-}
-
-func hasFileInPath(file string, path string) (bool, error) {
-	entries, err := os.ReadDir(path)
-	if err != nil {
-		return false, err
-	}
-
-	for _, entry := range entries {
-		if entry.Name() == file {
-			return true, nil
-		}
-	}
-
-	return false, nil
-}
-
-func getParentDir(path string) string {
-	dirs := strings.Split(path, "/")
-	dirs = dirs[:len(dirs)-2]
-
-	var newPath string
-	for _, dir := range dirs {
-		newPath += dir + "/"
-	}
-
-	return newPath
 }

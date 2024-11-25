@@ -5,8 +5,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/johnfercher/maroto/v2/pkg/consts/generation"
-
 	"github.com/johnfercher/maroto/v2/pkg/consts/extension"
 
 	"github.com/johnfercher/maroto/v2/pkg/consts/orientation"
@@ -29,9 +27,6 @@ type Builder interface {
 	WithTopMargin(top float64) Builder
 	WithRightMargin(right float64) Builder
 	WithBottomMargin(bottom float64) Builder
-	WithConcurrentMode(chunkWorkers int) Builder
-	WithSequentialMode() Builder
-	WithSequentialLowMemoryMode(chunkWorkers int) Builder
 	WithDebug(on bool) Builder
 	WithMaxGridSize(maxGridSize int) Builder
 	WithDefaultFont(font *props.Font) Builder
@@ -68,7 +63,6 @@ type CfgBuilder struct {
 	metadata             *entity.Metadata
 	backgroundImage      *entity.Image
 	disableAutoPageBreak bool
-	generationMode       generation.Mode
 }
 
 // NewBuilder is responsible to create an instance of Builder.
@@ -88,8 +82,7 @@ func NewBuilder() Builder {
 			Style:  fontstyle.Normal,
 			Color:  &props.BlackColor,
 		},
-		generationMode: generation.Sequential,
-		chunkWorkers:   1,
+		chunkWorkers: 1,
 	}
 }
 
@@ -154,37 +147,6 @@ func (b *CfgBuilder) WithBottomMargin(bottom float64) Builder {
 	}
 
 	b.margins.Bottom = bottom
-	return b
-}
-
-// WithConcurrentMode defines concurrent generation, chunk workers define how mano chuncks
-// will be executed concurrently.
-func (b *CfgBuilder) WithConcurrentMode(chunkWorkers int) Builder {
-	if chunkWorkers < 1 {
-		return b
-	}
-
-	b.generationMode = generation.Concurrent
-	b.chunkWorkers = chunkWorkers
-	return b
-}
-
-// WithSequentialMode defines that maroto will run in default mode.
-func (b *CfgBuilder) WithSequentialMode() Builder {
-	b.chunkWorkers = 1
-	b.generationMode = generation.Sequential
-	return b
-}
-
-// WithSequentialLowMemoryMode defines that maroto will run focusing in reduce memory consumption,
-// chunk workers define how many divisions the work will have.
-func (b *CfgBuilder) WithSequentialLowMemoryMode(chunkWorkers int) Builder {
-	if chunkWorkers < 1 {
-		return b
-	}
-
-	b.generationMode = generation.SequentialLowMemory
-	b.chunkWorkers = chunkWorkers
 	return b
 }
 
@@ -410,7 +372,6 @@ func (b *CfgBuilder) Build() *entity.Config {
 		ProviderType:         b.providerType,
 		Dimensions:           b.getDimensions(),
 		Margins:              b.margins,
-		GenerationMode:       b.generationMode,
 		ChunkWorkers:         b.chunkWorkers,
 		Debug:                b.debug,
 		MaxGridSize:          b.maxGridSize,

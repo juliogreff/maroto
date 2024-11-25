@@ -39,32 +39,6 @@ func TestNew(t *testing.T) {
 		assert.NotNil(t, sut)
 		assert.Equal(t, "*maroto.Maroto", fmt.Sprintf("%T", sut))
 	})
-	t.Run("when config with an concurrent mode is sent, should create Maroto object", func(t *testing.T) {
-		// Arrange
-		cfg := config.NewBuilder().
-			WithConcurrentMode(7).
-			Build()
-
-		// Act
-		sut := maroto.New(cfg)
-
-		// Assert
-		assert.NotNil(t, sut)
-		assert.Equal(t, "*maroto.Maroto", fmt.Sprintf("%T", sut))
-	})
-	t.Run("when config with an low memory mode is sent, should create Maroto object", func(t *testing.T) {
-		// Arrange
-		cfg := config.NewBuilder().
-			WithSequentialLowMemoryMode(10).
-			Build()
-
-		// Act
-		sut := maroto.New(cfg)
-
-		// Assert
-		assert.NotNil(t, sut)
-		assert.Equal(t, "*maroto.Maroto", fmt.Sprintf("%T", sut))
-	})
 }
 
 func TestMaroto_AddRow(t *testing.T) {
@@ -290,46 +264,9 @@ func TestMaroto_Generate(t *testing.T) {
 		assert.Nil(t, err)
 		assert.NotNil(t, doc)
 	})
-	t.Run("when rows do not fit on the current page and concurrent mode is active, should executed in parallel", func(t *testing.T) {
-		// Arrange
-		cfg := config.NewBuilder().
-			WithConcurrentMode(7).
-			Build()
-
-		sut := maroto.New(cfg)
-
-		// Act
-		for i := 0; i < 30; i++ {
-			sut.AddRow(10, col.New(12))
-		}
-
-		// Assert
-		doc, err := sut.Generate()
-		assert.Nil(t, err)
-		assert.NotNil(t, doc)
-	})
-	t.Run("when two pages are sent and low memory mode is active, should executed in low memory mode", func(t *testing.T) {
-		// Arrange
-		cfg := config.NewBuilder().
-			WithSequentialLowMemoryMode(10).
-			Build()
-
-		sut := maroto.New(cfg)
-
-		// Act
-		for i := 0; i < 30; i++ {
-			sut.AddRow(10, col.New(12))
-		}
-
-		// Assert
-		doc, err := sut.Generate()
-		assert.Nil(t, err)
-		assert.NotNil(t, doc)
-	})
 	t.Run("when two pages are sent and sequential generation is active, should executed in sequential generation mode", func(t *testing.T) {
 		// Arrange
 		cfg := config.NewBuilder().
-			WithSequentialMode().
 			Build()
 
 		sut := maroto.New(cfg)
@@ -341,38 +278,6 @@ func TestMaroto_Generate(t *testing.T) {
 
 		// Assert
 		test.New(t).Assert(sut.GetStructure()).Equals("maroto_sequential.json")
-	})
-	t.Run("when two pages are sent and sequential low memory is active, should executed in sequential low memory mode", func(t *testing.T) {
-		// Arrange
-		cfg := config.NewBuilder().
-			WithSequentialLowMemoryMode(10).
-			Build()
-
-		sut := maroto.New(cfg)
-
-		// Act
-		for i := 0; i < 30; i++ {
-			sut.AddRow(10, col.New(12))
-		}
-
-		// Assert
-		test.New(t).Assert(sut.GetStructure()).Equals("maroto_sequential_low_memory.json")
-	})
-	t.Run("when two pages are sent and concurrent mode is active, should executed in parallel", func(t *testing.T) {
-		// Arrange
-		cfg := config.NewBuilder().
-			WithConcurrentMode(10).
-			Build()
-
-		sut := maroto.New(cfg)
-
-		// Act
-		for i := 0; i < 30; i++ {
-			sut.AddRow(10, col.New(12))
-		}
-
-		// Assert
-		test.New(t).Assert(sut.GetStructure()).Equals("maroto_concurrent.json")
 	})
 	t.Run("when two pages are sent and page number is active, should add page number", func(t *testing.T) {
 		// Arrange

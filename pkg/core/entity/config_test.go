@@ -3,8 +3,6 @@ package entity
 import (
 	"testing"
 
-	"github.com/johnfercher/maroto/v2/pkg/consts/generation"
-
 	"github.com/stretchr/testify/assert"
 
 	"github.com/johnfercher/maroto/v2/pkg/consts/extension"
@@ -34,7 +32,6 @@ func TestConfig_ToMap(t *testing.T) {
 	assert.Equal(t, fontstyle.Bold, m["prop_font_style"])
 	assert.Equal(t, 15.0, m["prop_font_size"])
 	assert.Equal(t, "RGB(255, 0, 0)", m["prop_font_color"])
-	assert.Equal(t, generation.Concurrent, m["generation_mode"])
 	assert.Equal(t, 7, m["chunk_workers"])
 	assert.Equal(t, true, m["config_debug"])
 	assert.Equal(t, 15, m["config_max_grid_sum"])
@@ -74,7 +71,6 @@ func fixtureConfig() Config {
 		Dimensions:           &dimensions,
 		Margins:              &margins,
 		DefaultFont:          &font,
-		GenerationMode:       generation.Concurrent,
 		ChunkWorkers:         7,
 		Debug:                true,
 		MaxGridSize:          15,

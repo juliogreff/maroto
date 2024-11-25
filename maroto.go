@@ -3,20 +3,14 @@ package maroto
 import (
 	"errors"
 
-	"github.com/johnfercher/maroto/v2/pkg/consts/generation"
-
 	"github.com/johnfercher/maroto/v2/internal/cache"
 
 	"github.com/johnfercher/maroto/v2/internal/providers/gofpdf"
-
-	"github.com/johnfercher/maroto/v2/pkg/merge"
 
 	"github.com/johnfercher/maroto/v2/pkg/core/entity"
 
 	"github.com/johnfercher/go-tree/node"
 
-	"github.com/f-amaral/go-async/async"
-	"github.com/f-amaral/go-async/pool"
 	"github.com/johnfercher/maroto/v2/pkg/components/col"
 	"github.com/johnfercher/maroto/v2/pkg/components/page"
 	"github.com/johnfercher/maroto/v2/pkg/components/row"
@@ -38,9 +32,6 @@ type Maroto struct {
 	headerHeight  float64
 	footerHeight  float64
 	currentHeight float64
-
-	// Processing
-	pool async.Processor[[]core.Page, []byte]
 }
 
 // GetCurrentConfig is responsible for returning the current settings from the file
@@ -66,12 +57,6 @@ func New(cfgs ...*entity.Config) core.Maroto {
 		}),
 		cache:  cache,
 		config: cfg,
-	}
-
-	if cfg.GenerationMode == generation.Concurrent {
-		p := pool.NewPool[[]core.Page, []byte](cfg.ChunkWorkers, m.processPage,
-			pool.WithSortingOutput[[]core.Page, []byte]())
-		m.pool = p
 	}
 
 	return m
@@ -168,14 +153,6 @@ func (m *Maroto) RegisterFooter(rows ...core.Row) error {
 func (m *Maroto) Generate() (core.Document, error) {
 	m.fillPageToAddNew()
 	m.setConfig()
-
-	if m.config.GenerationMode == generation.Concurrent {
-		return m.generateConcurrently()
-	}
-
-	if m.config.GenerationMode == generation.SequentialLowMemory {
-		return m.generateLowMemory()
-	}
 
 	return m.generate()
 }
@@ -285,87 +262,7 @@ func (m *Maroto) generate() (core.Document, error) {
 		return nil, err
 	}
 
-	return core.NewPDF(documentBytes, nil), nil
-}
-
-func (m *Maroto) generateConcurrently() (core.Document, error) {
-	chunks := len(m.pages) / m.config.ChunkWorkers
-	if chunks == 0 {
-		chunks = 1
-	}
-	pageGroups := make([][]core.Page, 0)
-	for i := 0; i < len(m.pages); i += chunks {
-		end := i + chunks
-
-		if end > len(m.pages) {
-			end = len(m.pages)
-		}
-
-		pageGroups = append(pageGroups, m.pages[i:end])
-	}
-
-	processed := m.pool.Process(pageGroups)
-	if processed.HasError {
-		return nil, errors.New("an error has occurred while trying to generate PDFs concurrently")
-	}
-
-	pdfs := make([][]byte, len(processed.Results))
-	for i, result := range processed.Results {
-		bytes := result.Output.([]byte)
-		pdfs[i] = bytes
-	}
-
-	mergedBytes, err := merge.Bytes(pdfs...)
-	if err != nil {
-		return nil, err
-	}
-
-	return core.NewPDF(mergedBytes, nil), nil
-}
-
-func (m *Maroto) generateLowMemory() (core.Document, error) {
-	chunks := len(m.pages) / m.config.ChunkWorkers
-	if chunks == 0 {
-		chunks = 1
-	}
-	pageGroups := make([][]core.Page, 0)
-	for i := 0; i < len(m.pages); i += chunks {
-		end := i + chunks
-
-		if end > len(m.pages) {
-			end = len(m.pages)
-		}
-
-		pageGroups = append(pageGroups, m.pages[i:end])
-	}
-
-	var pdfResults [][]byte
-	for _, pageGroup := range pageGroups {
-		bytes, err := m.processPage(pageGroup)
-		if err != nil {
-			return nil, errors.New("an error has occurred while trying to generate PDFs in low memory mode")
-		}
-
-		pdfResults = append(pdfResults, bytes)
-	}
-
-	mergedBytes, err := merge.Bytes(pdfResults...)
-	if err != nil {
-		return nil, err
-	}
-
-	return core.NewPDF(mergedBytes, nil), nil
-}
-
-func (m *Maroto) processPage(pages []core.Page) ([]byte, error) {
-	innerCtx := m.cell.Copy()
-
-	innerProvider := getProvider(cache.NewMutexDecorator(cache.New()), m.config)
-	for _, page := range pages {
-		page.Render(innerProvider, innerCtx)
-	}
-
-	return innerProvider.GenerateBytes()
+	return core.NewPDF(documentBytes), nil
 }
 
 func (m *Maroto) getRowsHeight(rows ...core.Row) float64 {
