@@ -2,6 +2,7 @@ package maroto
 
 import (
 	"errors"
+	"math"
 
 	"github.com/johnfercher/maroto/v2/internal/cache"
 
@@ -220,6 +221,9 @@ func (m *Maroto) addHeader() {
 
 func (m *Maroto) fillPageToAddNew() {
 	space := m.cell.Height - m.currentHeight - m.footerHeight
+
+	// Truncate space to 9 decimal places to avoid rounding errors
+	space = math.Floor(space*math.Pow10(9)) / math.Pow10(9)
 
 	c := col.New(m.config.MaxGridSize)
 	spaceRow := row.New(space)
